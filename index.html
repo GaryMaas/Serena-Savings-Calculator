@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Serena Savings Calculator</title>
+    <style>
+        body {
+            font-family: Helvetica, sans-serif;
+            background-color: #FFFFFF;
+            color: #2E3A53;
+            margin: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2 {
+            color: #2E3A53;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            border-bottom: 2px solid #A5C1E5;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            color: #2E3A53;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #7F7F7F;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #7F7F7F;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background-color: #A5C1E5;
+            color: #2E3A53;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #8EAED6;
+        }
+
+        #savings {
+            margin-top: 40px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2E3A53;
+            text-align: center;
+            background-color: #A5C1E5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+    <script>
+        function calculateSavings() {
+            const labName = document.getElementById('labName').value;
+            const currentCost = parseFloat(document.getElementById('currentCost').value) || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const listPrice = parseFloat(document.getElementById('listPrice').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+
+            if (!labName || !currentCost || !quantity || !listPrice || discount === "") {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            const annualCurrentSpend = currentCost * quantity * 12;
+            const discountedPrice = listPrice * (1 - discount / 100);
+            const annualNewSpend = discountedPrice * quantity * 12;
+            const savings = annualCurrentSpend - annualNewSpend;
+
+            document.getElementById('savings').innerText =
+                `Annual Savings with Serena Sleep: $${savings.toFixed(2)}`;
+
+            // Save data to Google Sheets
+            fetch("https://script.google.com/macros/s/AKfycbwVvf5NrhWrS9gus-J57C6cWFSass7coLJ6LIajtnBA1sZRnVH5C6gnUiTFl41cGPd1/exec", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    labName: labName,
+                    currentCost: currentCost,
+                    quantity: quantity,
+                    listPrice: listPrice,
+                    discount: discount,
+                    savings: savings
+                })
+            }).then(response => {
+                if (!response.ok) {
+                    console.error("Error saving data");
+                }
+            }).catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h2>Serena Savings Calculator</h2>
+
+    <div class="section">
+        <h3>Your Current Costs</h3>
+        <label for="labName">Name of the lab you currently use</label>
+        <input type="text" id="labName" required>
+
+        <label for="currentCost">Your Product Cost ($)</label>
+        <input type="number" id="currentCost" required>
+
+        <label for="quantity">Your Monthly Quantity Purchased</label>
+        <input type="number" id="quantity" required>
+    </div>
+
+    <div class="section">
+        <h3>Serena Sleep Pricing</h3>
+        <label for="listPrice">Serena Sleep List Price ($)</label>
+        <input type="number" id="listPrice" required>
+
+        <label for="discount">Discount (%)</label>
+        <input type="number" id="discount" required>
+    </div>
+
+    <button onclick="calculateSavings()">Calculate</button>
+
+    <div id="savings">Annual Savings with Serena Sleep:</div>
+</body>
+</html>
